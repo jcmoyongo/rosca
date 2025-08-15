@@ -1,26 +1,29 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class PotDistribution extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      PotDistribution.belongsTo(models.ROSCAGroup, { foreignKey: 'roscaGroupId' });
+      PotDistribution.belongsTo(models.GroupMember, { foreignKey: 'recipientMemberId' });
     }
   }
+
   PotDistribution.init({
     roscaGroupId: DataTypes.INTEGER,
     recipientMemberId: DataTypes.INTEGER,
-    amount_distributed: DataTypes.FLOAT,
-    distributed_on: DataTypes.DATE
+    amount_distributed: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    distributed_on: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    }
   }, {
     sequelize,
     modelName: 'PotDistribution',
   });
+
   return PotDistribution;
 };

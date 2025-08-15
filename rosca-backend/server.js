@@ -21,9 +21,10 @@ const db = require('./models');
 
 app.use(express.json());
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/groups', require('./routes/groups'));
+// Import central router
+const routes = require('./routes/index'); // path to your index.js
+app.use('/api', routes); // <- all routes will be prefixed with /api
+
 
 const PORT = process.env.PORT || 5000;
 db.sequelize.sync().then(() => {

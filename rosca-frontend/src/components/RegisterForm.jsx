@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-export default function RegisterForm() {
+export default function RegisterForm({ onRegister }) {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -10,6 +11,8 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setLoading(true);
 
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
@@ -19,13 +22,19 @@ export default function RegisterForm() {
       });
 
       const data = await res.json();
+
       if (res.ok) {
-        setMessage(`✅ Success! Token: ${data.token}`);
+        setMessage(`✅ Registration successful!`);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.userId);
+        if (onRegister) onRegister(); // switch to dashboard or login
       } else {
-        setMessage(`❌ Error: ${data.error || "Registration failed"}`);
+        setMessage(`❌ ${data.error || "Registration failed"}`);
       }
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,12 +42,34 @@ export default function RegisterForm() {
     <div style={{ maxWidth: "400px", margin: "auto" }}>
       <h2>Register for ROSCA</h2>
       <form onSubmit={handleSubmit}>
-        <input id="name" placeholder="Name" onChange={handleChange} required /><br />
-        <input id="email" type="email" placeholder="Email" onChange={handleChange} required /><br />
-        <input id="password" type="password" placeholder="Password" onChange={handleChange} required /><br />
-        <button type="submit">Register</button>
+        <input
+          id="name"
+          placeholder="Name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        /><br />
+        <input
+          id="email"
+          type="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        /><br />
+        <input
+          id="password"
+          type="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        /><br />
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
+        </button>
       </form>
-      <p>{message}</p>
+      {message && <p>{message}</p>}
     </div>
   );
 }

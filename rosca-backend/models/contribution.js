@@ -1,25 +1,27 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Contribution extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      Contribution.belongsTo(models.GroupMember, { foreignKey: 'groupMemberId' });
     }
   }
+
   Contribution.init({
     groupMemberId: DataTypes.INTEGER,
-    amount_paid: DataTypes.FLOAT,
-    paid_on: DataTypes.DATE
+    amount_paid: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    paid_on: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    }
   }, {
     sequelize,
     modelName: 'Contribution',
   });
+
   return Contribution;
 };
